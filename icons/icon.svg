@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="plastic" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe9da"/><stop offset=".35" stop-color="#d9d1bd"/><stop offset="1" stop-color="#c4bba4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".6">
+      <stop offset="0" stop-color="#12301b"/><stop offset="1" stop-color="#08100a"/>
+    </radialGradient>
+    <pattern id="scan" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="2" fill="#000" fill-opacity=".35"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="#4f5964"/>
+  <g id="art">
+    <!-- stand -->
+    <rect x="206" y="384" width="100" height="30" fill="#aaa18b"/>
+    <rect x="160" y="408" width="192" height="22" rx="11" fill="#d9d1bd"/>
+    <!-- monitor body -->
+    <rect x="70" y="92" width="372" height="300" rx="38" fill="url(#plastic)"/>
+    <!-- screen -->
+    <rect x="98" y="118" width="316" height="226" rx="30" fill="#2b2e28"/>
+    <rect x="106" y="126" width="300" height="210" rx="26" fill="url(#glow)"/>
+    <!-- reel rows -->
+    <rect x="146" y="158" width="56" height="20" rx="4" fill="#3f8f55" fill-opacity=".55"/>
+    <rect x="214" y="158" width="150" height="20" rx="4" fill="#3f8f55" fill-opacity=".55"/>
+    <rect x="114" y="206" width="284" height="50" fill="#7dff9a" fill-opacity=".14"/>
+    <rect x="114" y="206" width="284" height="2" fill="#7dff9a" fill-opacity=".7"/>
+    <rect x="114" y="254" width="284" height="2" fill="#7dff9a" fill-opacity=".7"/>
+    <rect x="146" y="219" width="56" height="24" rx="4" fill="#7dff9a"/>
+    <rect x="214" y="219" width="132" height="24" rx="4" fill="#7dff9a"/>
+    <rect x="146" y="284" width="56" height="20" rx="4" fill="#3f8f55" fill-opacity=".55"/>
+    <rect x="214" y="284" width="112" height="20" rx="4" fill="#3f8f55" fill-opacity=".55"/>
+    <path d="M118 214 L138 231 L118 248 Z" fill="#7dff9a"/>
+    <path d="M394 214 L374 231 L394 248 Z" fill="#7dff9a"/>
+    <rect x="106" y="126" width="300" height="210" rx="26" fill="url(#scan)"/>
+    <!-- LED -->
+    <circle cx="404" cy="364" r="8" fill="#40ff7a"/>
+    <!-- Post-it -->
+    <g transform="rotate(9 372 98)">
+      <rect x="326" y="52" width="92" height="92" fill="#ffe866"/>
+      <rect x="350" y="44" width="44" height="14" fill="#ffffff" fill-opacity=".6"/>
+      <rect x="338" y="80" width="64" height="7" rx="3.5" fill="#2b2a1a" fill-opacity=".55"/>
+      <rect x="338" y="96" width="50" height="7" rx="3.5" fill="#2b2a1a" fill-opacity=".55"/>
+      <rect x="338" y="112" width="58" height="7" rx="3.5" fill="#2b2a1a" fill-opacity=".55"/>
+    </g>
+  </g>
+</svg>
