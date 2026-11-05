@@ -116,6 +116,9 @@ body {
 .res-title { font-size: 34px; line-height: 1; margin: 0; text-wrap: balance; }
 .res-meta { font-size: 20px; color: var(--phosphor-dim); display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .res-meta .dbl { color: #ffd166; text-shadow: 0 0 6px rgba(255,209,102,.5); }
+.desc { margin: 2px 0 4px; font-family: var(--f-type); font-size: 15px; line-height: 1.45; color: #b9f5c6; text-shadow: none; max-width: 60ch; }
+.desc.muted { color: var(--phosphor-dim); font-style: italic; }
+.desc small { display: block; margin-top: 4px; font-size: 11px; color: var(--phosphor-dim); letter-spacing: .04em; }
 .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
 .tbtn { font-family: var(--f-screen); font-size: 22px; text-decoration: none; color: var(--screen); background: var(--phosphor); padding: 2px 12px; border-radius: 2px; text-shadow: none; box-shadow: 0 0 10px rgba(125,255,154,.45); }
 .tbtn.alt { background: transparent; color: var(--phosphor); outline: 1px solid var(--phosphor); }
@@ -194,6 +197,7 @@ body {
         <div class="result" id="result" aria-live="polite">
           <p class="res-title" id="res-title">Traveling Salesmen</p>
           <div class="res-meta" id="res-meta"><span>STAFFEL 3 · FOLGE 12</span><span>(BEISPIEL)</span></div>
+          <p class="desc muted" id="desc" lang="en">Lade Beschreibung …</p>
           <div class="links">
             <a class="tbtn" href="https://www.netflix.com/title/70136120" target="_blank" rel="noopener">[ NETFLIX ÖFFNEN ]</a>
             <a class="tbtn alt" href="https://www.amazon.de/s?k=The+Office+US&amp;i=instant-video" target="_blank" rel="noopener">[ PRIME VIDEO ]</a>
@@ -360,11 +364,53 @@ function spin() {
   requestAnimationFrame(frame);
 }
 
+/* Episode descriptions: loaded live from TVmaze (free, no key), English only */
+const norm = t => t.toLowerCase().replace(/\(part \d\)|part \d|\(\d\)/g, "").replace(/[^a-z0-9]/g, "");
+let tvmaze = null;
+function loadTvmaze() {
+  if (tvmaze) return tvmaze;
+  tvmaze = (async () => {
+    try { const c = JSON.parse(localStorage.getItem("tvmaze-v1")); if (c && c.length > 150) return c; } catch (e) {}
+    const r = await fetch("https://api.tvmaze.com/lookup/shows?imdb=tt0386676");
+    if (!r.ok) throw new Error("lookup");
+    const show = await r.json();
+    const er = await fetch(`https://api.tvmaze.com/shows/${show.id}/episodes`);
+    if (!er.ok) throw new Error("episodes");
+    const list = (await er.json()).map(x => ({ s: x.season, n: x.number, t: norm(x.name || ""),
+      d: new DOMParser().parseFromString(x.summary || "", "text/html").body.textContent.trim() }));
+    try { localStorage.setItem("tvmaze-v1", JSON.stringify(list)); } catch (e) {}
+    return list;
+  })();
+  tvmaze.catch(() => { tvmaze = null; });
+  return tvmaze;
+}
+function findDesc(list, ep) {
+  const key = norm(ep.title), same = list.filter(x => x.s === ep.s);
+  const hit = same.find(x => x.t === key) || same.find(x => x.t.startsWith(key) || key.startsWith(x.t) && x.t.length > 3);
+  const byNum = same.length === SEASONS[ep.s - 1].length ? same.find(x => x.n === ep.e) : null; // same numbering: safe fallback
+  const h = hit || byNum;
+  return h && h.d ? h.d : "";
+}
+async function showDesc(ep) {
+  const el = $("desc");
+  el.className = "desc muted"; el.textContent = "Lade Beschreibung …";
+  try {
+    const d = findDesc(await loadTvmaze(), ep);
+    if (current !== ep) return;
+    if (d) { el.className = "desc"; el.textContent = d; el.insertAdjacentHTML("beforeend", "<small>Beschreibung: TVmaze (englisch)</small>"); }
+    else { el.textContent = "Zu dieser Folge gibt es keine Beschreibung."; }
+  } catch (e) {
+    if (current === ep) el.textContent = "Beschreibung konnte nicht geladen werden. Prüfe deine Internetverbindung.";
+  }
+}
+showDesc(current);
+
 function land(ep) {
   current = ep; spinning = false;
   setStrip([randomEp(ALL), ep, randomEp(ALL)]); place(1, rowH());
   $("res-title").textContent = ep.title;
   $("res-meta").innerHTML = `<span>STAFFEL ${ep.s} · FOLGE ${ep.e}</span>` + (ep.double ? `<span class="dbl">★ DOPPELFOLGE</span>` : "");
+  showDesc(ep);
   $("hint").innerHTML = `&gt; Auf der Serienseite <b>Staffel ${ep.s}</b> wählen, dann Folge ${ep.e} starten.`;
   $("screen").classList.remove("idle"); $("led").classList.remove("busy"); $("roll").disabled = false;
   tick(880, .08); setTimeout(() => tick(1320, .08), 90);
