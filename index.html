@@ -319,7 +319,8 @@ let current = ALL.find(ep => ep.s === 3 && ep.e === 12);
 const randomEp = pool => pool[rnd(pool.length)];
 function setStrip(list) { strip.innerHTML = list.map(rowHTML).join(""); }
 function place(index, h) { strip.style.transform = `translateY(${-(index - 1) * h}px)`; }
-setStrip([randomEp(ALL), current, randomEp(ALL)]); place(1, rowH());
+let view = [randomEp(ALL), current, randomEp(ALL)]; // what the reel shows: above, center, below
+setStrip(view); place(1, rowH());
 addEventListener("resize", () => { if (!spinning) place(1, rowH()); });
 
 let history = [], spinning = false;
@@ -336,8 +337,8 @@ function spin() {
   const pool = ALL.filter(ep => active.has(ep.s));
   const target = pickTarget();
   const STEPS = reduced ? 4 : 46 + rnd(10);
-  const list = [randomEp(pool), current];
-  for (let i = 0; i < STEPS - 1; i++) list.push(randomEp(pool));
+  const list = [view[0], current, view[2]];           // start exactly where the reel stopped
+  for (let i = 0; i < STEPS - 2; i++) list.push(randomEp(pool));
   list.push(target, randomEp(pool));          // target sits at index STEPS + 1
   setStrip(list);
   const h = rowH(), from = 1, to = STEPS + 1;
@@ -359,7 +360,7 @@ function spin() {
     const idx = Math.round(pos);
     if (idx !== lastIdx) { lastIdx = idx; tick(t > .85 ? 1200 : 1800, t > .85 ? .07 : .04); }
     if (t < 1) requestAnimationFrame(frame);
-    else { strip.style.filter = "none"; place(to, h); land(target); }
+    else { strip.style.filter = "none"; place(to, h); land(target, list[to - 1], list[to + 1]); }
   }
   requestAnimationFrame(frame);
 }
@@ -405,9 +406,10 @@ async function showDesc(ep) {
 }
 showDesc(current);
 
-function land(ep) {
+function land(ep, above, below) {
   current = ep; spinning = false;
-  setStrip([randomEp(ALL), ep, randomEp(ALL)]); place(1, rowH());
+  view = [above, ep, below];                          // keep the neighbours that were visible
+  setStrip(view); place(1, rowH());
   $("res-title").textContent = ep.title;
   $("res-meta").innerHTML = `<span>STAFFEL ${ep.s} · FOLGE ${ep.e}</span>` + (ep.double ? `<span class="dbl">★ DOPPELFOLGE</span>` : "");
   showDesc(ep);
