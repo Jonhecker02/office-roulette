@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f5964">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Office Roulette">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Office Roulette</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&family=Permanent+Marker&family=Archivo:wdth,wght@75..100,500..800&display=swap">
+<style>
+/* Layout: a Scranton office desk seen from the front — name plate, beige CRT with a
+   phosphor reel, Post-it on the bezel, keyboard keys below, a printed memo at the end.
+   Deliberately single-look (office at daytime), every color set explicitly. */
+:root {
+  color-scheme: light;
+  --carpet: #4f5964;       /* grey-blue office carpet */
+  --carpet-2: #59636e;
+  --wall: #d8cfb6;         /* Scranton beige */
+  --plastic: #d9d1bd;      /* yellowed PC plastic */
+  --plastic-hi: #ece6d6;
+  --plastic-lo: #a79e88;
+  --screen: #0b140d;
+  --phosphor: #7dff9a;
+  --phosphor-dim: #3f8f55;
+  --paper: #fbfaf5;
+  --ink: #1f2a33;
+  --ink-soft: #5b646b;
+  --postit: #ffe866;
+  --stamp: #b3342b;
+  --wood: #8a5a35;
+  --f-screen: "VT323", "Courier New", ui-monospace, monospace;
+  --f-type: "Courier Prime", "Courier New", ui-monospace, monospace;
+  --f-hand: "Permanent Marker", "Comic Sans MS", cursive;
+  --f-ui: "Archivo", "Arial Narrow", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; color: var(--ink); font-family: var(--f-ui); font-size: 16px; line-height: 1.45;
+  background-color: var(--carpet);
+  background-image:
+    radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.2px),
+    radial-gradient(rgba(0,0,0,.08) 1px, transparent 1.2px);
+  background-size: 6px 6px, 9px 9px; background-position: 0 0, 3px 4px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+
+/* Desk name plate */
+.plate {
+  align-self: center; text-align: center; padding: 10px 26px 12px; border-radius: 4px;
+  background: linear-gradient(180deg, #3b2a1c, #23180f); color: #e9cf8a;
+  box-shadow: inset 0 0 0 2px #b9954a, inset 0 0 0 4px #23180f, 0 8px 18px -8px rgba(0,0,0,.6);
+}
+.plate small { display: block; font-family: var(--f-type); font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: #b9954a; }
+.plate h1 { margin: 2px 0 0; font-family: var(--f-ui); font-stretch: 75%; font-weight: 800; font-size: clamp(28px, 7vw, 40px); letter-spacing: .06em; text-transform: uppercase; line-height: 1; }
+
+/* CRT monitor */
+.monitor-area { position: relative; display: flex; flex-direction: column; }
+.postit {
+  position: relative; z-index: 3; align-self: flex-end; margin: 0 10px -16px 0; width: min(280px, 82%);
+  background: var(--postit); color: #2b2a1a; padding: 12px 14px 14px; transform: rotate(3deg);
+  box-shadow: 0 10px 14px -8px rgba(0,0,0,.5); font-family: var(--f-hand); font-size: 14px; line-height: 1.3;
+}
+.postit::before { content: ""; position: absolute; top: -9px; left: 50%; width: 64px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: rgba(255,255,255,.55); }
+.postit blockquote { margin: 0; }
+.postit figcaption { margin-top: 6px; font-family: var(--f-type); font-size: 12px; font-weight: 700; }
+.postit figcaption::before { content: "– "; }
+.postit figure { margin: 0; }
+
+.monitor {
+  background: linear-gradient(180deg, var(--plastic-hi), var(--plastic) 30%, #cfc6b0);
+  border-radius: 18px 18px 22px 22px; padding: 22px 22px 14px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), inset 0 -4px 0 var(--plastic-lo), 0 24px 40px -18px rgba(0,0,0,.65);
+}
+.screen {
+  position: relative; overflow: hidden; border-radius: 22px / 18px; background: var(--screen); color: var(--phosphor);
+  font-family: var(--f-screen); padding: 14px 16px 16px;
+  box-shadow: inset 0 0 0 3px #1d241e, inset 0 0 40px rgba(0,0,0,.9), 0 0 0 6px #2b2e28;
+  text-shadow: 0 0 6px rgba(125,255,154,.55);
+}
+.screen::after { /* scanlines + glass */
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0,0,0,.28) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 30% 10%, rgba(255,255,255,.07), transparent 55%);
+}
+.titlebar { display: flex; justify-content: space-between; gap: 12px; font-size: 18px; color: var(--phosphor-dim); border-bottom: 1px solid #1f4a2b; padding-bottom: 6px; margin-bottom: 10px; }
+.cursor { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Reel */
+.reel { --row: 46px; position: relative; height: calc(var(--row) * 3); overflow: hidden; border-block: 1px solid #1f4a2b;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent); }
+.reel::before { content: ""; position: absolute; left: 0; right: 0; top: var(--row); height: var(--row); background: rgba(125,255,154,.09); border-block: 1px solid rgba(125,255,154,.45); z-index: 1; pointer-events: none; }
+.strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.row { height: var(--row); display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding-inline: 10px; font-size: 28px; white-space: nowrap; }
+.row .c { color: var(--phosphor-dim); font-variant-numeric: tabular-nums; }
+.row .t { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pointer { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 26px; }
+.pointer.l { left: 0; } .pointer.r { right: 0; }
+
+.result { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
+.res-title { font-size: 34px; line-height: 1; margin: 0; text-wrap: balance; }
+.res-meta { font-size: 20px; color: var(--phosphor-dim); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.res-meta .dbl { color: #ffd166; text-shadow: 0 0 6px rgba(255,209,102,.5); }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.tbtn { font-family: var(--f-screen); font-size: 22px; text-decoration: none; color: var(--screen); background: var(--phosphor); padding: 2px 12px; border-radius: 2px; text-shadow: none; box-shadow: 0 0 10px rgba(125,255,154,.45); }
+.tbtn.alt { background: transparent; color: var(--phosphor); outline: 1px solid var(--phosphor); }
+.tbtn:hover, .tbtn:focus-visible { filter: brightness(1.15); outline: 2px solid #fff; outline-offset: 2px; }
+.hint { font-size: 19px; color: var(--phosphor-dim); margin: 2px 0 0; }
+.hint b { color: var(--phosphor); font-weight: 400; }
+.screen.idle .result { opacity: .55; }
+
+.chin { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-inline: 6px; }
+.badge { font-family: var(--f-ui); font-stretch: 75%; font-weight: 700; font-size: 12px; letter-spacing: .2em; color: #7d7562; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+.led-wrap { display: flex; align-items: center; gap: 10px; }
+.led { width: 9px; height: 9px; border-radius: 50%; background: #40ff7a; box-shadow: 0 0 8px #40ff7a; }
+.led.busy { background: #ffb340; box-shadow: 0 0 8px #ffb340; animation: blink .25s steps(1) infinite; }
+.sound { font-family: var(--f-type); font-size: 12px; background: none; border: 1px solid #a79e88; color: #6d6552; border-radius: 3px; padding: 2px 8px; cursor: pointer; }
+.stand { width: 34%; height: 18px; margin: 0 auto; background: linear-gradient(180deg, #bdb49e, #a39a84); border-radius: 0 0 6px 6px; }
+.foot { width: 52%; height: 12px; margin: 0 auto; background: var(--plastic); border-radius: 8px; box-shadow: 0 10px 14px -6px rgba(0,0,0,.6); }
+
+/* Keyboard */
+.keyboard { background: linear-gradient(180deg, #cfc7b2, #bdb49e); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 0 16px 26px -14px rgba(0,0,0,.7); }
+.kb-label { display: flex; justify-content: space-between; gap: 10px; font-family: var(--f-type); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #5f5845; }
+.kb-label button { font: inherit; letter-spacing: .04em; background: none; border: 0; color: #2f4f7f; cursor: pointer; padding: 0; text-transform: none; }
+.keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+.key {
+  font-family: var(--f-ui); font-weight: 700; font-size: 17px; color: #4c4636; cursor: pointer;
+  background: linear-gradient(180deg, #f3eee2, #ddd5c2); border: 1px solid #a79e88; border-radius: 6px;
+  padding: 10px 0 12px; box-shadow: 0 4px 0 #9b927c; transition: transform .06s, box-shadow .06s; position: relative;
+}
+.key::after { content: ""; position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: #9b927c; }
+.key[aria-pressed="true"]::after { background: #2fd160; box-shadow: 0 0 6px #2fd160; }
+.key[aria-pressed="false"] { color: #9b927c; }
+.key:active, .enter:active { transform: translateY(3px); box-shadow: 0 1px 0 #9b927c; }
+.enter {
+  font-family: var(--f-ui); font-stretch: 80%; font-weight: 800; font-size: 22px; letter-spacing: .08em; text-transform: uppercase;
+  color: #fff; cursor: pointer; border: 1px solid #7a2a22; border-radius: 8px; padding: 16px 12px;
+  background: linear-gradient(180deg, #d24a3c, #a8342a); box-shadow: 0 5px 0 #6d221b; transition: transform .06s, box-shadow .06s;
+}
+.enter:active { box-shadow: 0 1px 0 #6d221b; }
+.enter[disabled] { filter: saturate(.5) brightness(.9); cursor: progress; }
+.enter small { display: block; font-family: var(--f-type); font-size: 12px; font-weight: 400; letter-spacing: .05em; text-transform: none; opacity: .85; }
+.key:focus-visible, .enter:focus-visible, .sound:focus-visible, .kb-label button:focus-visible { outline: 3px solid #2f6fd1; outline-offset: 2px; }
+@media (max-width: 440px) { .keys { grid-template-columns: repeat(5, 1fr); } .row { font-size: 24px; } .reel { --row: 40px; } }
+
+/* Printed memo */
+.memo { background: var(--paper); color: var(--ink); font-family: var(--f-type); padding: 34px 22px 26px; border-radius: 2px; box-shadow: 0 18px 26px -16px rgba(0,0,0,.7); transform: rotate(-.6deg); position: relative; display: flex; flex-direction: column; gap: 16px; }
+.memo::before { content: ""; position: absolute; top: -6px; left: 28px; width: 14px; height: 34px; border: 3px solid #9aa3ab; border-radius: 8px; border-bottom-color: transparent; }
+.memo h2 { margin: 0; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.memo h2 span:last-child { font-weight: 400; color: var(--ink-soft); letter-spacing: .04em; text-transform: none; }
+.memo dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 14px; }
+.memo dt { font-weight: 700; } .memo dd { margin: 0; }
+.ok { color: #23724a; font-weight: 700; } .no { color: var(--stamp); font-weight: 700; }
+.memo p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+.history { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.history li { display: grid; grid-template-columns: 74px 1fr; gap: 10px; padding: 5px 0; border-bottom: 1px dotted #b9b6aa; }
+.history li.empty { grid-template-columns: 1fr; color: var(--ink-soft); }
+.stampmark { position: absolute; right: 18px; bottom: 16px; font-weight: 700; font-size: 13px; letter-spacing: .14em; color: var(--stamp); border: 2px solid currentColor; padding: 2px 8px; transform: rotate(-8deg); opacity: .8; }
+
+@media (prefers-reduced-motion: reduce) { .cursor, .led.busy { animation: none; } }
+</style>
+
+<div class="wrap">
+  <div class="plate"><small>Regional Manager of</small><h1>Office Roulette</h1></div>
+
+  <div class="monitor-area">
+    <figure class="postit" aria-label="Zitat des Tages">
+      <blockquote id="quote-text">„I'm not superstitious, but I am a little stitious."</blockquote>
+      <figcaption id="quote-who">Michael Scott</figcaption>
+    </figure>
+
+    <div class="monitor">
+      <div class="screen idle" id="screen">
+        <div class="titlebar"><span>C:\SCRANTON\ROULETTE.EXE</span><span><span id="count">187</span> FOLGEN<span class="cursor">_</span></span></div>
+        <div class="reel" aria-hidden="true">
+          <span class="pointer l">▶</span><span class="pointer r">◀</span>
+          <div class="strip" id="strip"></div>
+        </div>
+        <div class="result" id="result" aria-live="polite">
+          <p class="res-title" id="res-title">Traveling Salesmen</p>
+          <div class="res-meta" id="res-meta"><span>STAFFEL 3 · FOLGE 12</span><span>(BEISPIEL)</span></div>
+          <div class="links">
+            <a class="tbtn" href="https://www.netflix.com/title/70136120" target="_blank" rel="noopener">[ NETFLIX ÖFFNEN ]</a>
+            <a class="tbtn alt" href="https://www.amazon.de/s?k=The+Office+US&amp;i=instant-video" target="_blank" rel="noopener">[ PRIME VIDEO ]</a>
+          </div>
+          <p class="hint" id="hint">&gt; Auf der Serienseite <b>Staffel 3</b> wählen, dann Folge 12 starten.</p>
+        </div>
+      </div>
+      <div class="chin">
+        <span class="badge">SCRANTON · 2005</span>
+        <span class="led-wrap"><button class="sound" type="button" id="sound" aria-pressed="true">Ton: an</button><span class="led" id="led"></span></span>
+      </div>
+    </div>
+    <div class="stand"></div><div class="foot"></div>
+  </div>
+
+  <div class="keyboard">
+    <div class="kb-label"><span>Staffeln im Topf</span><button type="button" id="all">Alle wählen</button></div>
+    <div class="keys" id="keys"></div>
+    <button class="enter" type="button" id="roll">Folge auswürfeln<small>oder Leertaste drücken</small></button>
+  </div>
+
+  <article class="memo">
+    <h2><span>Memo · Zuletzt gewürfelt</span><span>Ablage</span></h2>
+    <ul class="history" id="history"><li class="empty">Noch nichts gewürfelt.</li></ul>
+    <h2><span>Wo läuft The Office (US)?</span><span>Deutschland, Stand 10/2026</span></h2>
+    <dl>
+      <dt>Netflix</dt><dd><span class="ok">Verfügbar</span>, alle 9 Staffeln im Abo</dd>
+      <dt>Prime Video</dt><dd><span class="ok">Verfügbar</span>, im Abo enthalten</dd>
+      <dt>WOW</dt><dd><span class="no">Nicht im Angebot</span></dd>
+    </dl>
+    <p>Lizenzen ändern sich. Wenn ein Link ins Leere läuft, ist die Serie dort vermutlich ausgelaufen. Doppelfolgen sind bei Netflix teils in zwei Teile geteilt, daher kann die Folgennummer dort leicht abweichen.</p>
+    <span class="stampmark" aria-hidden="true">GEPRÜFT</span>
+  </article>
+</div>
+
+<script>
+const D = "*"; // marks double-length episodes
+const SEASONS = [
+  ["Pilot","Diversity Day","Health Care","The Alliance","Basketball","Hot Girl"],
+  ["The Dundies","Sexual Harassment","Office Olympics","The Fire","Halloween","The Fight","The Client","Performance Review","Email Surveillance","Christmas Party","Booze Cruise","The Injury","The Secret","The Carpet","Boys and Girls","Valentine's Day","Dwight's Speech","Take Your Daughter to Work Day","Michael's Birthday","Drug Testing","Conflict Resolution","Casino Night"],
+  ["Gay Witch Hunt","The Convention","The Coup","Grief Counseling","Initiation","Diwali","Branch Closing","The Merger","The Convict","A Benihana Christmas*","Back from Vacation","Traveling Salesmen","The Return","Ben Franklin","Phyllis' Wedding","Business School","Cocktails","The Negotiation","Safety Training","Product Recall","Women's Appreciation","Beach Games","The Job*"],
+  ["Fun Run*","Dunder Mifflin Infinity*","Launch Party*","Money*","Local Ad","Branch Wars","Survivor Man","The Deposition","Dinner Party","Chair Model","Night Out","Did I Stutter?","Job Fair","Goodbye, Toby*"],
+  ["Weight Loss*","Business Ethics","Baby Shower","Crime Aid","Employee Transfer","Customer Survey","Business Trip","Frame Toby","The Surplus","Moroccan Christmas","The Duel","Prince Family Paper","Stress Relief*","Lecture Circuit: Part 1","Lecture Circuit: Part 2","Blood Drive","Golden Ticket","New Boss","Two Weeks","Dream Team","Michael Scott Paper Company","Heavy Competition","Broke","Casual Friday","Cafe Disco","Company Picnic"],
+  ["Gossip","The Meeting","The Promotion","Niagara*","Mafia","The Lover","Koi Pond","Double Date","Murder","Shareholder Meeting","Scott's Tots","Secret Santa","The Banker","Sabre","Manager and Salesman","The Delivery*","St. Patrick's Day","New Leads","Happy Hour","Secretary's Day","Body Language","The Cover-Up","The Chump","Whistleblower"],
+  ["Nepotism","Counseling","Andy's Play","Sex Ed","The Sting","Costume Contest","Christening","Viewing Party","WUPHF.com","China","Classy Christmas*","Ultimatum","The Seminar","The Search","PDA","Threat Level Midnight","Todd Packer","Garage Sale","Training Day","Michael's Last Dundies","Goodbye, Michael","The Inner Circle","Dwight K. Schrute, (Acting) Manager","Search Committee*"],
+  ["The List","The Incentive","Lotto","Garden Party","Spooked","Doomsday","Pam's Replacement","Gettysburg","Mrs. California","Christmas Wishes","Trivia","Pool Party","Jury Duty","Special Project","Tallahassee","After Hours","Test the Store","Last Day in Florida","Get the Girl","Welcome Party","Angry Andy","Fundraiser","Turf War","Free Family Portrait Studio"],
+  ["New Guys","Roy's Wedding","Andy's Ancestry","Work Bus","Here Comes Treble","The Boat","The Whale","The Target","Dwight Christmas","Lice","Suit Warehouse","Customer Loyalty","Junior Salesman","Vandalism","Couples Discount","Moving On","The Farm","Promos","Stairmageddon","Paper Airplane","Livin' the Dream","A.A.R.M.*","Finale*"]
+];
+const ALL = SEASONS.flatMap((eps, si) => eps.map((t, ei) => ({ s: si + 1, e: ei + 1, title: t.replace(D, ""), double: t.endsWith(D) })));
+
+const QUOTES = [
+  ["I'm not superstitious, but I am a little stitious.", "Michael Scott"],
+  ["Would I rather be feared or loved? Easy. Both. I want people to be afraid of how much they love me.", "Michael Scott"],
+  ["I declare bankruptcy!", "Michael Scott"],
+  ["Sometimes I'll start a sentence and I don't even know where it's going. I just hope I find it along the way.", "Michael Scott"],
+  ["I knew exactly what to do. But in a much more real sense, I had no idea what to do.", "Michael Scott"],
+  ["Why are you the way that you are?", "Michael Scott"],
+  ["Toby is in HR, which technically means he works for corporate. So he's really not a part of our family. Also, he's divorced, so he's really not a part of his family.", "Michael Scott"],
+  ["Identity theft is not a joke, Jim! Millions of families suffer every year!", "Dwight Schrute"],
+  ["Whenever I'm about to do something, I think, 'Would an idiot do that?' And if they would, I do not do that thing.", "Dwight Schrute"],
+  ["Through concentration, I can raise and lower my cholesterol at will.", "Dwight Schrute"],
+  ["Bears. Beets. Battlestar Galactica.", "Jim Halpert"],
+  ["I wish there was a way to know you're in the good old days before you've actually left them.", "Andy Bernard"],
+  ["There's a lot of beauty in ordinary things. Isn't that kind of the point?", "Pam Beesly"],
+  ["I talk a lot, so I've learned to just tune myself out.", "Kelly Kapoor"],
+  ["If I don't have some cake soon, I might die.", "Stanley Hudson"],
+  ["Did I stutter?", "Stanley Hudson"]
+];
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+const codeOf = ep => `S${pad(ep.s)}E${pad(ep.e)}`;
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rnd = n => { const r = new Uint32Array(1); crypto.getRandomValues(r); return r[0] % n; };
+$("count").textContent = ALL.length;
+
+/* Quote on the Post-it */
+(() => { const [t, who] = QUOTES[rnd(QUOTES.length)]; $("quote-text").textContent = `„${t}"`; $("quote-who").textContent = who; })();
+
+/* Season keys */
+let active = new Set([1,2,3,4,5,6,7,8,9]);
+try { const a = JSON.parse(localStorage.getItem("seasons")); if (Array.isArray(a) && a.length) active = new Set(a); } catch (e) {}
+const save = () => { try { localStorage.setItem("seasons", JSON.stringify([...active])); } catch (e) {} };
+function renderKeys() {
+  const box = $("keys"); box.innerHTML = "";
+  for (let s = 1; s <= 9; s++) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "key"; b.id = "season-" + s; b.textContent = s;
+    b.setAttribute("aria-pressed", active.has(s)); b.setAttribute("aria-label", "Staffel " + s);
+    b.onclick = () => { if (active.has(s)) { if (active.size > 1) active.delete(s); } else active.add(s); save(); renderKeys(); };
+    box.appendChild(b);
+  }
+}
+$("all").onclick = () => { active = new Set([1,2,3,4,5,6,7,8,9]); save(); renderKeys(); };
+renderKeys();
+
+/* Sound: short relay click per passing row, only after a button press */
+let soundOn = true, ac = null;
+try { soundOn = localStorage.getItem("sound") !== "off"; } catch (e) {}
+const syncSound = () => { $("sound").textContent = "Ton: " + (soundOn ? "an" : "aus"); $("sound").setAttribute("aria-pressed", soundOn); };
+$("sound").onclick = () => { soundOn = !soundOn; try { localStorage.setItem("sound", soundOn ? "on" : "off"); } catch (e) {} syncSound(); };
+syncSound();
+function tick(freq = 1800, vol = .05) {
+  if (!soundOn) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = "square"; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + .03);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + .035);
+  } catch (e) {}
+}
+
+/* Reel */
+const strip = $("strip");
+const rowH = () => strip.firstElementChild ? strip.firstElementChild.offsetHeight : 46;
+const rowHTML = ep => `<div class="row"><span class="c">${codeOf(ep)}</span><span class="t">${ep.title}</span></div>`;
+let current = ALL.find(ep => ep.s === 3 && ep.e === 12);
+const randomEp = pool => pool[rnd(pool.length)];
+function setStrip(list) { strip.innerHTML = list.map(rowHTML).join(""); }
+function place(index, h) { strip.style.transform = `translateY(${-(index - 1) * h}px)`; }
+setStrip([randomEp(ALL), current, randomEp(ALL)]); place(1, rowH());
+addEventListener("resize", () => { if (!spinning) place(1, rowH()); });
+
+let history = [], spinning = false;
+function pickTarget() {
+  const pool = ALL.filter(ep => active.has(ep.s));
+  const recent = new Set(history.slice(0, 5).map(codeOf));
+  const fresh = pool.filter(ep => !recent.has(codeOf(ep)));
+  return randomEp(fresh.length ? fresh : pool);
+}
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+  const pool = ALL.filter(ep => active.has(ep.s));
+  const target = pickTarget();
+  const STEPS = reduced ? 4 : 46 + rnd(10);
+  const list = [randomEp(pool), current];
+  for (let i = 0; i < STEPS - 1; i++) list.push(randomEp(pool));
+  list.push(target, randomEp(pool));          // target sits at index STEPS + 1
+  setStrip(list);
+  const h = rowH(), from = 1, to = STEPS + 1;
+  place(from, h);
+  $("screen").classList.add("idle"); $("led").classList.add("busy"); $("roll").disabled = true;
+  const dur = reduced ? 400 : 5200 + rnd(900);
+  // fast start, long slow coast, tiny settle at the end
+  const ease = t => 1 - Math.pow(1 - t, 4.2);
+  let start = null, lastIdx = from;
+  function frame(now) {
+    if (start === null) start = now;
+    const t = Math.min(1, (now - start) / dur);
+    const pos = from + (to - from) * ease(t);
+    strip.style.transform = `translateY(${-(pos - 1) * h}px)`;
+    if (!reduced) {
+      const v = (to - from) * 4.2 * Math.pow(1 - t, 3.2) / (dur / 1000); // rows per second
+      strip.style.filter = v > 8 ? `blur(${Math.min(2.5, v / 14)}px)` : "none";
+    }
+    const idx = Math.round(pos);
+    if (idx !== lastIdx) { lastIdx = idx; tick(t > .85 ? 1200 : 1800, t > .85 ? .07 : .04); }
+    if (t < 1) requestAnimationFrame(frame);
+    else { strip.style.filter = "none"; place(to, h); land(target); }
+  }
+  requestAnimationFrame(frame);
+}
+
+function land(ep) {
+  current = ep; spinning = false;
+  setStrip([randomEp(ALL), ep, randomEp(ALL)]); place(1, rowH());
+  $("res-title").textContent = ep.title;
+  $("res-meta").innerHTML = `<span>STAFFEL ${ep.s} · FOLGE ${ep.e}</span>` + (ep.double ? `<span class="dbl">★ DOPPELFOLGE</span>` : "");
+  $("hint").innerHTML = `&gt; Auf der Serienseite <b>Staffel ${ep.s}</b> wählen, dann Folge ${ep.e} starten.`;
+  $("screen").classList.remove("idle"); $("led").classList.remove("busy"); $("roll").disabled = false;
+  tick(880, .08); setTimeout(() => tick(1320, .08), 90);
+  history.unshift(ep); history = history.slice(0, 6);
+  $("history").innerHTML = history.map(x => `<li><span>${codeOf(x)}</span><span>${x.title}</span></li>`).join("");
+}
+
+$("roll").onclick = spin;
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !["BUTTON","A","INPUT"].includes(document.activeElement.tagName)) { e.preventDefault(); spin(); }
+});
+</script>
+
+</body>
+</html>
