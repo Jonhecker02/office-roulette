@@ -141,6 +141,13 @@ body {
 .kb-label { display: flex; justify-content: space-between; gap: 10px; font-family: var(--f-type); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #5f5845; }
 .kb-label button { font: inherit; letter-spacing: .04em; background: none; border: 0; color: #2f4f7f; cursor: pointer; padding: 0; text-transform: none; }
 .keys { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+.moods { display: flex; flex-wrap: wrap; gap: 6px; }
+.moods .key { padding: 9px 12px 11px; font-size: 15px; flex: 1 1 auto; }
+.moods .key::after { display: none; }
+.moods .key[aria-pressed="false"] { color: #4c4636; }
+.moods .key[aria-pressed="true"] { background: linear-gradient(180deg, #2b3a2e, #1d2820); color: #7dff9a; border-color: #1d2820; box-shadow: 0 4px 0 #0f1611; text-shadow: 0 0 6px rgba(125,255,154,.5); }
+.mood-note { font-family: var(--f-type); font-size: 12px; color: #5f5845; margin: -4px 0 0; }
+.res-meta .mood { color: #b9f5c6; }
 .key {
   font-family: var(--f-ui); font-weight: 700; font-size: 17px; color: #4c4636; cursor: pointer;
   background: linear-gradient(180deg, #f3eee2, #ddd5c2); border: 1px solid #a79e88; border-radius: 6px;
@@ -214,6 +221,9 @@ body {
   </div>
 
   <div class="keyboard">
+    <div class="kb-label"><span>Worauf hast du Lust?</span></div>
+    <div class="moods" id="moods"></div>
+    <p class="mood-note" id="mood-note"></p>
     <div class="kb-label"><span>Staffeln im Topf</span><button type="button" id="all">Alle wählen</button></div>
     <div class="keys" id="keys"></div>
     <button class="enter" type="button" id="roll">Folge auswürfeln<small>oder Leertaste drücken</small></button>
@@ -272,7 +282,45 @@ const pad = n => String(n).padStart(2, "0");
 const codeOf = ep => `S${pad(ep.s)}E${pad(ep.e)}`;
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rnd = n => { const r = new Uint32Array(1); crypto.getRandomValues(r); return r[0] % n; };
-$("count").textContent = ALL.length;
+/* Moods: hand-picked by episode content (season: episode numbers). Subjective, editable. */
+const MOODS = {
+  lustig: { label: "Zum Lachen", note: "Die großen Lacher der Serie.", eps: {
+    1:[2,5], 2:[1,3,4,6,9,10,11,12,17,20,21], 3:[1,3,4,5,8,9,10,11,12,13,14,16,18,19,20,22],
+    4:[1,3,4,5,7,8,9,10,11], 5:[1,6,8,9,10,11,12,13,17,21,22,23,24,25], 6:[1,4,5,7,9,12,16],
+    7:[1,5,6,9,10,11,16,18,20,23], 8:[7,8,10,11,14,15,17,19], 9:[5,9,13,16,18,19] } },
+  cringe: { label: "Fremdschämen", note: "Michael (und andere) in Höchstform. Finger vor die Augen.", eps: {
+    1:[2], 2:[2,9,10,21], 3:[1,6,9,15,21], 4:[1,7,9,10,11,12], 5:[4,13,14], 6:[6,8,10,11],
+    7:[4,7,13,16,17], 8:[20,21], 9:[13] } },
+  herz: { label: "Herz & Tiefgang", note: "Folgen mit Gefühl, großen Momenten und Abschieden.", eps: {
+    2:[22], 3:[4,16,22,23], 4:[14], 5:[5,8,15,19,26], 6:[4,16], 7:[18,20,21], 9:[12,15,16,20,21,22,23] } },
+  jimpam: { label: "Jim & Pam", note: "Die wichtigsten Momente von Jim und Pam.", eps: {
+    1:[2,6], 2:[1,10,11,13,20,22], 3:[7,11,17,18,22,23], 4:[1,4], 5:[1,8,26], 6:[4,16], 7:[7], 9:[12,15,20,23] } },
+  feiertag: { label: "Feiertage", note: "Halloween, Weihnachten, Valentinstag und mehr.", eps: {
+    2:[5,10,16], 3:[6,10], 5:[10,16], 6:[12,17], 7:[6,11], 8:[5,10], 9:[9] } }
+};
+const moodsOf = ep => Object.keys(MOODS).filter(k => (MOODS[k].eps[ep.s] || []).includes(ep.e));
+let mood = "alle";
+try { const m = localStorage.getItem("mood"); if (m && (m === "alle" || MOODS[m])) mood = m; } catch (e) {}
+const inPool = ep => active.has(ep.s) && (mood === "alle" || moodsOf(ep).includes(mood));
+const bySeason = () => ALL.filter(ep => active.has(ep.s));
+const poolNow = () => { const p = ALL.filter(inPool); return p.length ? p : bySeason(); };
+function updateCount() {
+  const n = ALL.filter(inPool).length;
+  $("count").textContent = n || bySeason().length;
+  $("mood-note").textContent = mood === "alle" ? "Alle Folgen sind im Topf."
+    : n ? `${MOODS[mood].note} ${n} Folgen im Topf.`
+    : "In den gewählten Staffeln gibt es dazu keine Folge. Es wird aus allen Folgen dieser Staffeln gewürfelt.";
+}
+function renderMoods() {
+  const box = $("moods"); box.innerHTML = "";
+  [["alle", "Alles"], ...Object.entries(MOODS).map(([k, v]) => [k, v.label])].forEach(([k, label]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "key"; b.id = "mood-" + k; b.textContent = label;
+    b.setAttribute("aria-pressed", mood === k);
+    b.onclick = () => { mood = k; try { localStorage.setItem("mood", k); } catch (e) {} renderMoods(); updateCount(); };
+    box.appendChild(b);
+  });
+}
 
 /* Quote on the Post-it */
 (() => { const [t, who] = QUOTES[rnd(QUOTES.length)]; $("quote-text").textContent = `„${t}"`; $("quote-who").textContent = who; })();
@@ -287,12 +335,12 @@ function renderKeys() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "key"; b.id = "season-" + s; b.textContent = s;
     b.setAttribute("aria-pressed", active.has(s)); b.setAttribute("aria-label", "Staffel " + s);
-    b.onclick = () => { if (active.has(s)) { if (active.size > 1) active.delete(s); } else active.add(s); save(); renderKeys(); };
+    b.onclick = () => { if (active.has(s)) { if (active.size > 1) active.delete(s); } else active.add(s); save(); renderKeys(); updateCount(); };
     box.appendChild(b);
   }
 }
-$("all").onclick = () => { active = new Set([1,2,3,4,5,6,7,8,9]); save(); renderKeys(); };
-renderKeys();
+$("all").onclick = () => { active = new Set([1,2,3,4,5,6,7,8,9]); save(); renderKeys(); updateCount(); };
+renderKeys(); renderMoods(); updateCount();
 
 /* Sound: short relay click per passing row, only after a button press */
 let soundOn = true, ac = null;
@@ -325,7 +373,7 @@ addEventListener("resize", () => { if (!spinning) place(1, rowH()); });
 
 let history = [], spinning = false;
 function pickTarget() {
-  const pool = ALL.filter(ep => active.has(ep.s));
+  const pool = poolNow();
   const recent = new Set(history.slice(0, 5).map(codeOf));
   const fresh = pool.filter(ep => !recent.has(codeOf(ep)));
   return randomEp(fresh.length ? fresh : pool);
@@ -334,7 +382,7 @@ function pickTarget() {
 function spin() {
   if (spinning) return;
   spinning = true;
-  const pool = ALL.filter(ep => active.has(ep.s));
+  const pool = poolNow();
   const target = pickTarget();
   const STEPS = reduced ? 4 : 46 + rnd(10);
   const list = [view[0], current, view[2]];           // start exactly where the reel stopped
@@ -411,7 +459,7 @@ function land(ep, above, below) {
   view = [above, ep, below];                          // keep the neighbours that were visible
   setStrip(view); place(1, rowH());
   $("res-title").textContent = ep.title;
-  $("res-meta").innerHTML = `<span>STAFFEL ${ep.s} · FOLGE ${ep.e}</span>` + (ep.double ? `<span class="dbl">★ DOPPELFOLGE</span>` : "");
+  $("res-meta").innerHTML = `<span>STAFFEL ${ep.s} · FOLGE ${ep.e}</span>` + (ep.double ? `<span class="dbl">★ DOPPELFOLGE</span>` : "") + moodsOf(ep).map(k => `<span class="mood">#${MOODS[k].label.toUpperCase()}</span>`).join("");
   showDesc(ep);
   $("hint").innerHTML = `&gt; Auf der Serienseite <b>Staffel ${ep.s}</b> wählen, dann Folge ${ep.e} starten.`;
   $("screen").classList.remove("idle"); $("led").classList.remove("busy"); $("roll").disabled = false;
